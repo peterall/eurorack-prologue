@@ -8,7 +8,7 @@ plaits::VirtualAnalogEngine engine;
 float out_gain = 0.8f, aux_gain = 0.8f;
 #endif
 
-#ifdef OSC_WS
+#ifdef OSC_WSH
 #include "plaits/dsp/engine/waveshaping_engine.h"
 plaits::WaveshapingEngine engine;
 float out_gain = 0.7f, aux_gain = 0.6f;
@@ -20,16 +20,22 @@ plaits::FMEngine engine;
 float out_gain = 0.6f, aux_gain = 0.6f;
 #endif
 
-#ifdef OSC_GR
+#ifdef OSC_GRN
 #include "plaits/dsp/engine/grain_engine.h"
 plaits::GrainEngine engine;
 float out_gain = 0.7f, aux_gain = 0.6f;
 #endif
 
-#ifdef OSC_AD
+#ifdef OSC_ADD
 #include "plaits/dsp/engine/additive_engine.h"
 plaits::AdditiveEngine engine;
 float out_gain = 0.8f, aux_gain = 0.8f;
+#endif
+
+#if defined(OSC_WTA) || defined(OSC_WTB) || defined(OSC_WTC) || defined(OSC_WTD) || defined(OSC_WTE) || defined(OSC_WTF)
+#include "plaits/dsp/engine/wavetable_engine.h"
+plaits::WavetableEngine engine;
+float out_gain = 0.6f, aux_gain = 0.6f;
 #endif
 
 plaits::EngineParameters parameters = {
@@ -48,7 +54,7 @@ float harmonics = 0,
   shape = 0,
   shiftshape = 0;
 
-int param_mode = 0;
+int shape_param = 0, shift_shape_param = 0;
 
 void OSC_INIT(uint32_t platform, uint32_t api)
 {
@@ -67,40 +73,19 @@ void OSC_CYCLE(const user_osc_param_t *const params,
 
   parameters.note = ((float)(params->pitch >> 8)) + ((params->pitch & 0xFF) * k_note_mod_fscale);
 
-  float shape_lfo = clip01f(shape + q31_to_f32(params->shape_lfo));
+  float shape_lfo = q31_to_f32(params->shape_lfo);
 
-  switch(param_mode) {
-  case 0:
-    parameters.timbre = shape_lfo;
-    parameters.morph = shiftshape;
-    parameters.harmonics = harmonics;
-    break;
-  case 1:
-    parameters.timbre = shape_lfo;
-    parameters.morph = morph;
-    parameters.harmonics = shiftshape;
-    break;
-  case 2:
-    parameters.timbre = shiftshape;
-    parameters.morph = shape_lfo;
-    parameters.harmonics = harmonics;
-    break;
-  case 3:
-    parameters.timbre = timbre;
-    parameters.morph = shape_lfo;
-    parameters.harmonics = shiftshape;
-    break;
-  case 4:
-    parameters.timbre = shiftshape;
-    parameters.morph = morph;
-    parameters.harmonics = shape_lfo;
-    break;
-  case 5:
-    parameters.timbre = timbre;
-    parameters.morph = shiftshape;
-    parameters.harmonics = shape_lfo;
-    break;
-  }
+  parameters.harmonics = clip01f(harmonics + 
+    (shape_param == 0 ? (shape + shape_lfo) : 0.0f) +
+    (shift_shape_param == 0 ? shiftshape : 0.0f));
+
+  parameters.timbre = clip01f(timbre + 
+    (shape_param == 1 ? (shape + shape_lfo) : 0.0f) +
+    (shift_shape_param == 1 ? shiftshape : 0.0f));
+
+  parameters.morph = clip01f(morph + 
+    (shape_param == 2 ? (shape + shape_lfo) : 0.0f) +
+    (shift_shape_param == 2 ? shiftshape : 0.0f));
 
   engine.Render(parameters, out, aux, (size_t)frames, &enveloped);
 
@@ -145,18 +130,19 @@ void OSC_PARAM(uint16_t index, uint16_t value)
     break;
 
   case k_osc_param_id5:
-    param_mode = value % 6;
+    shape_param = value % 3;
     break;
 
   case k_osc_param_id6:
+    shift_shape_param = value % 3;
     break;
 
   case k_osc_param_shape:
-    shape = clip01f(param_val_to_f32(value));
+    shape = param_val_to_f32(value);
     break;
 
   case k_osc_param_shiftshape:
-    shiftshape = clip01f(param_val_to_f32(value));
+    shiftshape = param_val_to_f32(value);
     break;
 
   default:
