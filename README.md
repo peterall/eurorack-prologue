@@ -6,7 +6,7 @@ This is a port of some of Mutable Instruments Plaits oscillators to the Korg Pro
 Oscillators
 -----
 | Name | Oscillator | 
-|--|--|--|
+|--|--|
 | `va` | Pair of classic waveforms |
 | `wsh` | Waveshaping oscillator | 
 | `fm` | Two operator FM |
