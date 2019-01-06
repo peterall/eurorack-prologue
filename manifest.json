@@ -1,0 +1,20 @@
+{
+    "header" : 
+    {
+        "platform" : "prologue",
+        "module" : "osc",
+        "api" : "1.0-0",
+        "dev_id" : 0,
+        "prg_id" : 0,
+        "version" : "1.0-0",
+        "name" : "mo2 %OSCILLATOR%",
+        "num_param" : 5,
+        "params" : [
+            ["Harmonics",  0, 100,  "%"],
+            ["Timbre",     0, 100,  "%"],
+            ["Morph",      0, 100,  "%"],
+            ["Out/Aux",    0, 100,  "%"],
+            ["ParamMode",  0,   5,   ""]        
+        ]
+    }
+}
