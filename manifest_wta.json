@@ -1,0 +1,17 @@
+{
+    "header" : 
+    {
+        "platform" : "prologue",
+        "module" : "osc",
+        "api" : "1.0-0",
+        "dev_id" : 0,
+        "prg_id" : 0,
+        "version" : "1.1-0",
+        "name" : "mo2wta",
+        "num_param" : 2,
+        "params" : [
+            ["Interpolate",  0, 1,  ""],
+            ["Low-fi",       0, 100,  "%"]
+        ]
+    }
+}

@@ -5,14 +5,14 @@ This is a port of some of Mutable Instruments Plaits oscillators to the Korg Pro
 
 Oscillators
 -----
-| Name | Oscillator | 
-|--|--|
-| `va` | Pair of classic waveforms |
-| `wsh` | Waveshaping oscillator | 
-| `fm` | Two operator FM |
-| `grn` | Granular formant oscillator |
-| `add` | Harmonic oscillator |
-| `wta`-`wtf`* | Wavetable oscillator | 
+| Name | Oscillator | Shape | Shift-shape |
+|--|--|--|--|
+| `va` | Pair of classic waveforms | Shape | Pulse width |
+| `wsh` | Waveshaping oscillator | Amount | Waveform |
+| `fm` | Two operator FM | Modulation index | Frequency ratio |
+| `grn` | Granular formant oscillator | Frequency ratio | Formant frequency |
+| `add` | Harmonic oscillator |Index of prominent harmonic  | Bump shape |
+| `wta`-`wtf`* | Wavetable oscillator |  | |
 
 \* Due to the 32k size constraint in the MultiEngine the Wavetable oscillator is split into 6 oscillators with 4 'rows' each.
 

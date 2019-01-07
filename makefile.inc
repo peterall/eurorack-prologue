@@ -14,6 +14,7 @@ endif
 
 PROJECT = mo2_$(OSCILLATOR)
 OSCILLATOR_UC = $(shell echo $(OSCILLATOR) | tr a-z A-Z)
+MANIFEST = manifest_$(OSCILLATOR).json
 
 PLATFORMDIR = logue-sdk/platform/prologue
 PROJECTDIR = .
@@ -28,7 +29,7 @@ CMSISDIR = $(EXTDIR)/CMSIS/CMSIS
 # #############################################################################
 
 ZIP = /usr/bin/zip
-ZIP_ARGS = -r -m -q
+ZIP_ARGS = -r -m -q -9
 
 ifeq ($(OS),Windows_NT)
 ifneq ($(MSYSTEM), MSYS)
@@ -69,8 +70,8 @@ RULESPATH = $(LDDIR)
 LDSCRIPT = $(LDDIR)/userosc.ld
 DLIBS = -lm
 
-DADEFS = -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4
-DDEFS = -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -D_USE_MATH_DEFINES -DOSC_$(OSCILLATOR_UC) -DOSCILLATOR_TYPE=$(OSCILLATOR)
+DADEFS = -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 
+DDEFS = -DSTM32F401xC -DSTM32F401xx -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -D_USE_MATH_DEFINES -DOSC_$(OSCILLATOR_UC) -DOSCILLATOR_TYPE=$(OSCILLATOR) 
 
 COPT = -std=c11 -mstructure-size-boundary=8
 CXXOPT = -std=c++11 -fno-rtti -fno-exceptions -fno-non-call-exceptions -fno-use-cxa-atexit -ffunction-sections -fdata-sections -funroll-loops
@@ -95,7 +96,6 @@ TOPT = -mthumb -mno-thumb-interwork -DTHUMB_NO_INTERWORKING -DTHUMB_PRESENT
 
 PKGDIR = $(PROJECT)
 PKGARCH = $(PROJECT).prlgunit
-MANIFEST = manifest.json
 PAYLOAD = payload.bin
 BUILDDIR = $(PROJECTDIR)/build
 OBJDIR = $(BUILDDIR)/obj
@@ -124,6 +124,9 @@ OBJS := $(ASMXOBJS) $(ASMOBJS) $(COBJS) $(CXXOBJS)
 DINCDIR = $(TEMPLATEDIR)/inc \
 	  $(TEMPLATEDIR)/inc/api \
 	  $(PROJECTDIR)/eurorack \
+	  $(PROJECTDIR)/eurorack/stmlib/third_party/STM \
+	  $(PROJECTDIR)/eurorack/stmlib/third_party/STM/CMSIS/CM3_f4xx \
+	  $(PROJECTDIR)/eurorack/stmlib/third_party/STM/STM32F4xx_StdPeriph_Driver/inc \
           $(PLATFORMDIR)/inc \
 	  $(PLATFORMDIR)/inc/dsp \
 	  $(PLATFORMDIR)/inc/utils \
@@ -229,9 +232,7 @@ clean:
 package:
 	@echo Packaging to ./$(PKGARCH)
 	@mkdir -p $(PKGDIR)
-	@cp -a $(MANIFEST) $(PKGDIR)/
-	@sed -ie 's/%OSCILLATOR%/$(OSCILLATOR)/g' $(PKGDIR)/$(MANIFEST)
-	@rm $(PKGDIR)/$(MANIFEST)e
+	@cp -a $(MANIFEST) $(PKGDIR)/manifest.json
 	@cp -a $(BUILDDIR)/$(PROJECT).bin $(PKGDIR)/$(PAYLOAD)
 	@$(ZIP) $(ZIP_ARGS) $(PROJECT).zip $(PKGDIR)
 	@mv $(PROJECT).zip $(PKGARCH)
