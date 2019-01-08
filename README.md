@@ -25,12 +25,13 @@ In the Multi-engine menu you can find additional parameters for the oscillators.
 `Parameter 2` sets the mix between the oscillator `out` and `aux`.
 
 `Parameter 3` sets the Shape LFO target according to the table below:
-| LFO Target | Parameter | Notes |
-|--|--|--|
-| 1| `Shape` |  |
-| 2| `Shift-shape` |  |
-| 3| `Parameter 1` | Not implemented for Wavetable oscillator |
-| 3| `Parameter 2` |  |
+
+| LFO Target | Parameter     | Notes |
+|------------|---------------|-------|
+| 1          | `Shape`       |       |
+| 2          | `Shift-shape` |       |
+| 3          | `Parameter 1` | Not implemented for Wavetable oscillator |
+| 3          | `Parameter 2` |       |
 
 
 For more information please read the excellent [Mutable Instruments Plaits documentation](https://mutable-instruments.net/modules/plaits/manual/).
