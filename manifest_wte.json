@@ -11,7 +11,8 @@
         "num_param" : 3,
         "params" : [
             ["Interpolate",  0, 1,  ""],
-            ["Low-Fi",       0, 100,  "%"]
+            ["Low-Fi",       0, 100,  "%"],
+            ["LFO Target", 0, 3,  ""]
         ]
     }
 }
