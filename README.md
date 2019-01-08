@@ -5,35 +5,40 @@ This is a port of some of Mutable Instruments Plaits oscillators to the Korg Pro
 
 Oscillators
 -----
-| Name | Oscillator | Shape | Shift-shape |
+| Name | Oscillator | `Shape` operation | `Shift-shape` operation |
 |--|--|--|--|
 | `va` | Pair of classic waveforms | Shape | Pulse width |
 | `wsh` | Waveshaping oscillator | Amount | Waveform |
 | `fm` | Two operator FM | Modulation index | Frequency ratio |
 | `grn` | Granular formant oscillator | Frequency ratio | Formant frequency |
 | `add` | Harmonic oscillator |Index of prominent harmonic  | Bump shape |
-| `wta`-`wtf`* | Wavetable oscillator |  | |
+| `wta`-`wtf`* | Wavetable oscillator | Row index | Column index |
 
 \* Due to the 32k size constraint in the MultiEngine the Wavetable oscillator is split into 6 oscillators with 4 'rows' each.
 
-Common parameters
+Parameters
 ----
-In the MultiEngine options if the Prologue you can find `Harmonics`, `Timbre` and `Morph` paramters for the oscillator (0-100%). These will do different things depending on the oscillator and is described in the [Mutable Instruments Plaits documentation](https://mutable-instruments.net/modules/plaits/manual/)
+In the Multi-engine menu you can find additional parameters for the oscillators.
 
-Plaits offer both `out` and `aux` outputs, and the `Out/Aux` parameter sets the mix between them.
+`Parameter 1` is oscillator specific and controls whichever parameter is not mapped to `Shape` or `Shift-shape`
 
-Finally, `Shape Prm` sets which parameter the `Shape` knob and Shape LFO controls, and `ShiftS Prm` sets which parameters is controlled when pressing `Shift` and turning the `Shape` knob. 
+`Parameter 2` sets the mix between the oscillator `out` and `aux`.
 
-| Value | Parameter |
-|--|--|
-| 1| Harmonics |
-| 2| Timbre |
-| 3| Morph |
+`Parameter 3` sets the Shape LFO target according to the table below:
+| LFO Target | Parameter | Notes |
+|--|--|--|
+| 1| `Shape` |  |
+| 2| `Shift-shape` |  |
+| 3| `Parameter 1` | Not implemented for Wavetable oscillator |
+| 3| `Parameter 2` |  |
+
+
+For more information please read the excellent [Mutable Instruments Plaits documentation](https://mutable-instruments.net/modules/plaits/manual/).
+
 
 Issues
 ----
-* Oscillators can sometime use more CPU than available causing the voice to hang forcing a reboot of the Prologue
-* The Prologue Librarian tends to timeout when transferring the user oscillator, however typically the transfer is still complete. Try adding the user oscillator one at a time and transfer 'Send All' after each.
+* The Prologue Librarian tends to timeout when transferring the user oscillator, however the transfer is still complete. Try adding the user oscillator one at a time and _Send All_ / _Receive All_ for each oscillator.
 
 Building
 -------

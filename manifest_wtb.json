@@ -6,12 +6,13 @@
         "api" : "1.0-0",
         "dev_id" : 0,
         "prg_id" : 0,
-        "version" : "1.1-0",
+        "version" : "1.2-0",
         "name" : "mo2wtb",
-        "num_param" : 2,
+        "num_param" : 3,
         "params" : [
             ["Interpolate",  0, 1,  ""],
-            ["Low-fi",       0, 100,  "%"]
+            ["Low-Fi",       0, 100,  "%"],
+            ["LFO Target", 0, 3,  ""]
         ]
     }
 }

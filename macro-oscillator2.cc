@@ -5,6 +5,7 @@
 
 uint16_t p_values[6] = {0};
 float shape = 0, shiftshape = 0, shape_lfo = 0, mix = 0;
+
 plaits::EngineParameters parameters = {
     .trigger = plaits::TRIGGER_UNPATCHED, 
     .note = 0,
@@ -12,17 +13,30 @@ plaits::EngineParameters parameters = {
     .morph = 0,
     .harmonics = 0,
     .accent = 0
-  };
+};
+
+inline float get_shape() {
+  return clip01f(shape + (p_values[k_osc_param_id3] == 0 ? shape_lfo : 0.0f));
+}
+inline float get_shift_shape() {
+  return clip01f(shiftshape + (p_values[k_osc_param_id3] == 1 ? shape_lfo : 0.0f));
+}
+inline float get_param_id1() {
+  return clip01f((p_values[k_osc_param_id1] * 0.01f) + (p_values[k_osc_param_id3] == 2 ? shape_lfo : 0.0f));
+}
+inline float get_param_id2() {
+  return clip01f((p_values[k_osc_param_id2] * 0.01f) + (p_values[k_osc_param_id3] == 3 ? shape_lfo : 0.0f));
+}
 
 #ifdef OSC_VA
 #include "plaits/dsp/engine/virtual_analog_engine.h"
 plaits::VirtualAnalogEngine engine;
 float out_gain = 0.8f, aux_gain = 0.8f;
 void update_parameters() {
-  parameters.harmonics = clip01f(p_values[k_osc_param_id1] * 0.01f);
-  parameters.timbre = clip01f(shiftshape);
-  parameters.morph = clip01f(shape + shape_lfo);
-  mix = clip01f(p_values[k_osc_param_id2] * 0.01f);
+  parameters.harmonics = get_param_id1();
+  parameters.timbre = get_shift_shape();
+  parameters.morph = get_shape();
+  mix = get_param_id2();
 }
 #endif
 
@@ -31,10 +45,10 @@ void update_parameters() {
 plaits::WaveshapingEngine engine;
 float out_gain = 0.7f, aux_gain = 0.6f;
 void update_parameters() {
-  parameters.harmonics = clip01f(shiftshape);
-  parameters.timbre = clip01f(shape + shape_lfo);
-  parameters.morph = clip01f(p_values[k_osc_param_id1] * 0.01f);
-  mix = clip01f(p_values[k_osc_param_id2] * 0.01f);
+  parameters.harmonics = get_shift_shape();
+  parameters.timbre = get_shape();
+  parameters.morph = get_param_id1();
+  mix = get_param_id2();
 }
 #endif
 
@@ -43,10 +57,10 @@ void update_parameters() {
 plaits::FMEngine engine;
 float out_gain = 0.6f, aux_gain = 0.6f;
 void update_parameters() {
-  parameters.harmonics = clip01f(shiftshape);
-  parameters.timbre = clip01f(shape + shape_lfo);
-  parameters.morph = clip01f(p_values[k_osc_param_id1] * 0.01f);
-  mix = clip01f(p_values[k_osc_param_id2] * 0.01f);
+  parameters.harmonics = get_shift_shape();
+  parameters.timbre = get_shape();
+  parameters.morph = get_param_id1();
+  mix = get_param_id2();
 }
 #endif
 
@@ -55,10 +69,10 @@ void update_parameters() {
 plaits::GrainEngine engine;
 float out_gain = 0.7f, aux_gain = 0.6f;
 void update_parameters() {
-  parameters.harmonics = clip01f(shape + shape_lfo);
-  parameters.timbre = clip01f(shiftshape);
-  parameters.morph = clip01f(p_values[k_osc_param_id1] * 0.01f);
-  mix = clip01f(p_values[k_osc_param_id2] * 0.01f);
+  parameters.harmonics = get_shape();
+  parameters.timbre = get_shift_shape();
+  parameters.morph = get_param_id1();
+  mix = get_param_id2();
 }
 #endif
 
@@ -67,10 +81,10 @@ void update_parameters() {
 plaits::AdditiveEngine engine;
 float out_gain = 0.8f, aux_gain = 0.8f;
 void update_parameters() {
-  parameters.harmonics = clip01f(p_values[k_osc_param_id1] * 0.01f);
-  parameters.timbre = clip01f(shape + shape_lfo);
-  parameters.morph = clip01f(shiftshape);
-  mix = clip01f(p_values[k_osc_param_id2] * 0.01f);
+  parameters.harmonics = get_param_id1();
+  parameters.timbre = get_shape();
+  parameters.morph = get_shift_shape();
+  mix = get_param_id2();
 }
 #endif
 
@@ -80,9 +94,9 @@ plaits::WavetableEngine engine;
 float out_gain = 0.6f, aux_gain = 0.6f;
 void update_parameters() {
   parameters.harmonics = p_values[k_osc_param_id1] == 0 ? (0.5f - 0.0625f) : (0.5f + 0.0625f);
-  parameters.timbre = clip01f(shape + shape_lfo);
-  parameters.morph = clip01f(shiftshape);
-  mix = clip01f(p_values[k_osc_param_id2] * 0.01f);
+  parameters.timbre = get_shape();
+  parameters.morph = get_shift_shape();
+  mix = get_param_id2();
 }
 #endif
 
@@ -95,28 +109,6 @@ void OSC_INIT(uint32_t platform, uint32_t api)
   engine.Init(&allocator);
 }
 
-/*
-template<warps::XmodAlgorithm alg>
-void xmod(float *out, float *aux, int32_t *yn, const size_t frames) {
-    for(size_t i=0;i<frames;i++) {
-    float o = out[i] * out_gain, a = aux[i] * aux_gain;
-    float s = warps::Modulator::Xmod<alg>(o, a, mix);
-    yn[i] = f32_to_q31(s);
-  }
-}
-
-
-typedef void (*MixFn)(float *out, float *aux, int32_t *yn, const size_t frames);
-
-MixFn mixers[6] = {
-  &xmod<warps::ALGORITHM_XFADE>,
-  &xmod<warps::ALGORITHM_ANALOG_RING_MODULATION>,
-  &xmod<warps::ALGORITHM_DIGITAL_RING_MODULATION>,
-  &xmod<warps::ALGORITHM_XOR>,
-  &xmod<warps::ALGORITHM_COMPARATOR>,
-  &xmod<warps::ALGORITHM_NOP>
-};
-*/
 void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t frames)
 {
   static float out[plaits::kMaxBlockSize], aux[plaits::kMaxBlockSize];
@@ -128,8 +120,6 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
   update_parameters();
 
   engine.Render(parameters, out, aux, (size_t)frames, &enveloped);
-
-//  mixers[p_values[k_osc_param_id3] % 6](out, aux, yn, frames);
 
   for(size_t i=0;i<frames;i++) {
     float o = out[i] * out_gain, a = aux[i] * aux_gain;
