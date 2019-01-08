@@ -7,12 +7,12 @@ Oscillators
 -----
 | Name | Oscillator | `Shape` operation | `Shift-shape` operation |
 |--|--|--|--|
-| `va` | Pair of classic waveforms | Shape | Pulse width |
-| `wsh` | Waveshaping oscillator | Amount | Waveform |
-| `fm` | Two operator FM | Modulation index | Frequency ratio |
-| `grn` | Granular formant oscillator | Frequency ratio | Formant frequency |
-| `add` | Harmonic oscillator |Index of prominent harmonic  | Bump shape |
-| `wta`-`wtf`* | Wavetable oscillator | Row index | Column index |
+| `mo2_va` | Pair of classic waveforms | Shape | Pulse width |
+| `mo2_wsh` | Waveshaping oscillator | Amount | Waveform |
+| `mo2_fm` | Two operator FM | Modulation index | Frequency ratio |
+| `mo2_grn` | Granular formant oscillator | Frequency ratio | Formant frequency |
+| `mo2_add` | Harmonic oscillator |Index of prominent harmonic  | Bump shape |
+| `mo2_wta`-`mo2_wtf`* | Wavetable oscillator | Row index | Column index |
 
 \* Due to the 32k size constraint in the MultiEngine the Wavetable oscillator is split into 6 oscillators with 4 'rows' each.
 
