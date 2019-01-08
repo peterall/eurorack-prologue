@@ -4,8 +4,7 @@ OSCILLATORS := $(wildcard *mk)
 
 $(TOPTARGETS): $(OSCILLATORS) package
 $(OSCILLATORS):
-#	@rm -fR .dep ./build
-	@rm -f ./build/obj/macro-oscillator2.o
+	@rm -fR .dep ./build
 	@$(MAKE) -f $@ $(MAKECMDGOALS)
 
 .PHONY: $(TOPTARGETS) $(OSCILLATORS)
