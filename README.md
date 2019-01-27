@@ -1,7 +1,7 @@
 Macro Oscillator 2 for Prologue
 ===============================
 
-This is a port of some of Mutable Instruments Plaits oscillators to the Korg Prologue MultiEngine.
+This is a port of some of Mutable Instruments Plaits oscillators to the Korg prologue multi-engine.
 
 Oscillators
 -----
@@ -14,7 +14,7 @@ Oscillators
 | `mo2_add` | Harmonic oscillator |Index of prominent harmonic  | Bump shape |
 | `mo2_wta`-`mo2_wtf`* | Wavetable oscillator | Row index | Column index |
 
-\* Due to the 32k size constraint in the MultiEngine the Wavetable oscillator is split into 6 oscillators with 4 'rows' each.
+\* Due to the 32k size constraint in the multi-engine the Wavetable oscillator is split into 6 oscillators with 4 'rows' each.
 
 Parameters
 ----
@@ -39,7 +39,13 @@ For more information please read the excellent [Mutable Instruments Plaits docum
 
 Issues
 ----
-* The Prologue Librarian tends to timeout when transferring the user oscillator, however the transfer is still complete. Try adding the user oscillator one at a time and _Send All_ / _Receive All_ for each oscillator.
+* The prologue Sound Librarian tends to timeout when transferring the user oscillator, however the transfer is still complete. Try adding the user oscillator one at a time and _Send All_ / _Receive All_ for each oscillator.
+
+
+Tips
+----
+Many plaits parameters 'neutral' settings are in center position, such as the `va` Detune or `fm` Feedback, however the prologue defaults all parameters to the lowest value, hence get used to going into the menus and set the first parameter to 50% when instantiating the oscillator.
+
 
 Building
 -------
