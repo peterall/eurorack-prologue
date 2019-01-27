@@ -1,0 +1,34 @@
+{
+    "configurations": [
+        {
+            "name": "gcc-arm-none-eabi",
+            "includePath": [
+                "${workspaceFolder}/logue-sdk/platform/prologue/osc/inc",
+                "${workspaceFolder}/logue-sdk/platform/prologue/osc/inc/api",
+                "${workspaceFolder}/eurorack",
+                "${workspaceFolder}/eurorack/stmlib/third_party/STM",
+                "${workspaceFolder}/eurorack/stmlib/third_party/STM/CMSIS/CM3_f4xx",
+                "${workspaceFolder}/eurorack/stmlib/third_party/STM/STM32F4xx_StdPeriph_Driver/inc",
+                "${workspaceFolder}/logue-sdk/platform/prologue/inc",
+                "${workspaceFolder}/logue-sdk/platform/prologue/inc/dsp",
+                "${workspaceFolder}/logue-sdk/platform/prologue/inc/utils",
+                "${workspaceFolder}/logue-sdk/platform/ext/CMSIS/CMSIS/Include"
+            ],
+            "defines": [
+                "STM32F401xC",
+                "CORTEX_USE_FPU=TRUE",
+                "ARM_MATH_CM4",
+                "STM32F401xx",
+                "__FPU_PRESENT",
+                "_USE_MATH_DEFINES",
+                "OSC_VA",
+                "OSCILLATOR_TYPE=va"
+            ],
+            "compilerPath": "${workspaceFolder}/logue-sdk/tools/gcc/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}
