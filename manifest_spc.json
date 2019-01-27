@@ -1,0 +1,18 @@
+{
+    "header" : 
+    {
+        "platform" : "prologue",
+        "module" : "osc",
+        "api" : "1.0-0",
+        "dev_id" : 0,
+        "prg_id" : 0,
+        "version" : "1.2-0",
+        "name" : "mo2spc",
+        "num_param" : 3,
+        "params" : [
+            ["Segment",     0, 100,  "%"],
+            ["Unfiltered",  0, 100,  "%"],
+            ["LFO Target",  0, 3,  ""]  
+        ]
+    }
+}

@@ -5,6 +5,7 @@
 
 uint16_t p_values[6] = {0};
 float shape = 0, shiftshape = 0, shape_lfo = 0, mix = 0;
+bool rising_edge = false;
 
 plaits::EngineParameters parameters = {
     .trigger = plaits::TRIGGER_UNPATCHED, 
@@ -100,13 +101,44 @@ void update_parameters() {
 }
 #endif
 
+#if defined(OSC_SPC)
+#include "plaits/dsp/engine/speech_engine.h"
+plaits::SpeechEngine engine;
+float out_gain = 0.7f, aux_gain = 0.8f;
+void update_parameters() {
+  parameters.harmonics = get_shape();
+  parameters.timbre = get_shift_shape();
+  parameters.morph = get_param_id1();
+  mix = get_param_id2();
+}
+#endif
 
 void OSC_INIT(uint32_t platform, uint32_t api)
 {
-  static uint8_t engine_buffer[plaits::kMaxBlockSize*sizeof(float)];
   stmlib::BufferAllocator allocator;
+
+#ifdef OSC_SPC
+  allocator.Init((void*)0x0800f100, 0xff00);
+#else
+  static uint8_t engine_buffer[plaits::kMaxBlockSize*sizeof(float)*2];
   allocator.Init(engine_buffer, sizeof(engine_buffer));
+#endif
   engine.Init(&allocator);
+
+#if defined(OSC_SPC)
+  engine.set_prosody_amount(0.f);
+  engine.set_speed(0.f);
+#endif
+}
+
+void OSC_NOTEON(const user_osc_param_t * const params)
+{
+  rising_edge = true;
+}
+
+void OSC_NOTEOFF(const user_osc_param_t * const params)
+{
+  (void)params;
 }
 
 void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t frames)
@@ -116,6 +148,8 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
 
   shape_lfo = q31_to_f32(params->shape_lfo);
   parameters.note = ((float)(params->pitch >> 8)) + ((params->pitch & 0xFF) * k_note_mod_fscale);
+  parameters.trigger = rising_edge ? plaits::TRIGGER_RISING_EDGE : plaits::TRIGGER_LOW;
+  rising_edge = false;
 
   update_parameters();
 
