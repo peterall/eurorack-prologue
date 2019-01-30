@@ -1,0 +1,21 @@
+{
+    "header" : 
+    {
+        "platform" : "prologue",
+        "module" : "osc",
+        "api" : "1.0-0",
+        "dev_id" : 0,
+        "prg_id" : 0,
+        "version" : "1.2-0",
+        "name" : "modal",
+        "num_param" : 6,
+        "params" : [
+            ["Damping",       0, 100,  "%"],
+            ["Timbre",         0, 100,  "%"],
+            ["Geometry",       0, 100,  "%"],
+            ["Brightness",     0, 100,  "%"],
+            ["Position",       0, 100,  "%"],
+            ["LFO Target",       0, 6,   ""]
+        ]
+    }
+}
