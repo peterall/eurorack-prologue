@@ -11,15 +11,12 @@ inline float get_shift_shape();
 inline float get_damping();
 inline float get_timbre();
 inline float get_brightness();
-inline float get_geometry();
+inline float get_meta();
 inline float get_position();
 
 Exciter strike_;
-//Diffuser diffuser_;
 Resonator resonator_;
-//stmlib::DCBlocker dc_blocker_;
-  
-//float diffuser_buffer_[1024];
+
 bool previous_gate_ = false;
 float exciter_level_ = 0.f;
 float strength_ = 0.f;
@@ -30,7 +27,7 @@ float strike_buffer_[kMaxBlockSize];
 float bow_strength_buffer_[kMaxBlockSize];
 
 float raw[kMaxBlockSize];
-float center[kMaxBlockSize];
+float center[kMaxBlockSize+2] = {.0f};
 float sides[kMaxBlockSize];
 
 Patch patch_ = {
@@ -116,9 +113,13 @@ void OSC_INIT(uint32_t platform, uint32_t api)
   resonator_.Init();
 }
 
-void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, uint32_t size)
+static const float ipf[] = { -0.1255050746084462f, 0.08657999474887323f, 0.7498810367318182f };
+#define lp_even(a,b,c) f32_to_q31(stmlib::SoftLimit((ipf[1] * a) + (ipf[2] * b) + (ipf[0] * c)))
+#define lp_odd(a,b,c)  f32_to_q31(stmlib::SoftLimit((ipf[0] * a) + (ipf[2] * b) + (ipf[1] * c)))
+
+
+void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t frames)
 {
-  size /= 2;
   shape_lfo = q31_to_f32(params->shape_lfo);
 
   performance_state_.note = ((float)(params->pitch >> 8)) + ((params->pitch & 0xFF) * k_note_mod_fscale);
@@ -132,12 +133,12 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, uint32_t size)
 
   //performance_state_.modulation = get_shape();
   //performance_state_.strength = get_strength();
-  patch_.exciter_envelope_shape = get_shift_shape();
-  patch_.exciter_strike_level = 0.8f;
-  patch_.exciter_strike_meta = get_shape();
+  patch_.exciter_envelope_shape = 1.0f;
+  patch_.exciter_strike_level = get_shift_shape();
+  patch_.exciter_strike_meta = get_meta();
   patch_.exciter_strike_timbre = get_timbre();
   patch_.exciter_signature = 0.0f;
-  patch_.resonator_geometry = get_geometry();
+  patch_.resonator_geometry = get_shape();
   patch_.resonator_brightness = get_brightness();
   patch_.resonator_position = get_position();
   patch_.resonator_damping = get_damping();
@@ -151,7 +152,7 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, uint32_t size)
       EXCITER_MODEL_PARTICLES);
   strike_.set_timbre(patch_.exciter_strike_timbre);
   strike_.set_signature(patch_.exciter_signature);
-  strike_.Process(flags, strike_buffer_, size);
+  strike_.Process(flags, strike_buffer_, kMaxBlockSize);
 
   // The Strike exciter is implemented in such a way that raising the level
   // beyond a certain point doesn't change the exciter amplitude, but instead,
@@ -162,27 +163,10 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, uint32_t size)
   strike_level = strike_level < 1.0f ? strike_level : 1.0f;
   strike_level *= 1.5f;
 
-  float strength = performance_state_.strength * 256.0f;
-  float strength_increment = (strength - strength_) / size;
 
   // Sum all sources of excitation.
-  for (size_t i = 0; i < size; ++i) {
-    strength_ += strength_increment;
-    //envelope_value_ += envelope_increment;
-    float input_sample = 0.0f;
-    float e = envelope_value_;
-    float strength_lut = strength_;
-    MAKE_INTEGRAL_FRACTIONAL(strength_lut);
-    float accent = lut_accent_gain_coarse[strength_lut_integral] *
-       lut_accent_gain_fine[
-           static_cast<int32_t>(256.0f * strength_lut_fractional)];
-    bow_strength_buffer_[i] = e * patch_.exciter_bow_level;
-
-    strike_buffer_[i] *= accent;
-    e *= accent;
-
-    input_sample += strike_buffer_[i] * strike_level;
-    raw[i] = input_sample;
+  for (size_t i = 0; i < kMaxBlockSize; ++i) {
+    raw[i] = strike_buffer_[i] * strike_level;
   }
 
     // Some exciters can cause palm mutes on release.
@@ -205,14 +189,22 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, uint32_t size)
   resonator_.set_modulation_offset(patch_.resonator_modulation_offset);
 
   // Process through resonator.
-  resonator_.Process(bow_strength_buffer_, raw, center, sides, size);
+  resonator_.Process(bow_strength_buffer_, raw, center+2, NULL, kMaxBlockSize);
 
-  for (size_t i = 0; i < size; ++i) {
-    center[i] += strike_bleed * strike_buffer_[i];
-    yn[i*2] = f32_to_q31(stmlib::SoftLimit(center[i]));
-    yn[i*2+1] = 0.f;
-    //yn[i] = f32_to_q31(stmlib::SoftLimit(raw[i]));
+  for (size_t i=0; i<kMaxBlockSize; ++i) {
+    center[i+2] += strike_bleed * strike_buffer_[i];
   }
+
+  for (size_t i=0; i<kMaxBlockSize; ++i) {
+    yn[i*2] = lp_even(center[i], center[i+1], center[i+2]);
+    yn[i*2+1] = lp_odd(center[i], center[i+1], center[i+2]);
+
+    //yn[i] = f32_to_q31(stmlib::SoftLimit(center[i]));
+    //yn[i*2] = f32_to_q31(stmlib::SoftLimit(center[i]));
+    //yn[i*2+1] = 0;
+  }
+  center[0] = center[kMaxBlockSize];
+  center[1] = center[kMaxBlockSize+1];
 }
 
 void OSC_NOTEON(const user_osc_param_t * const params)
@@ -265,7 +257,7 @@ inline float get_damping() {
 inline float get_timbre() {
   return clip01f((p_values[k_osc_param_id2] * 0.01f) + (p_values[k_osc_param_id6] == 3 ? shape_lfo : 0.0f));
 }
-inline float get_geometry() {
+inline float get_meta() {
   return clip01f((p_values[k_osc_param_id3] * 0.01f) + (p_values[k_osc_param_id6] == 4 ? shape_lfo : 0.0f));
 }
 inline float get_brightness() {
