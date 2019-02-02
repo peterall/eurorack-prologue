@@ -8,11 +8,11 @@ using namespace elements;
 
 inline float get_shape();
 inline float get_shift_shape();
+inline float get_strength();
 inline float get_damping();
 inline float get_timbre();
 inline float get_brightness();
 inline float get_meta();
-inline float get_position();
 
 Exciter strike_;
 Resonator resonator_;
@@ -28,7 +28,6 @@ float bow_strength_buffer_[kMaxBlockSize];
 
 float raw[kMaxBlockSize];
 float center[kMaxBlockSize+2] = {.0f};
-float sides[kMaxBlockSize];
 
 Patch patch_ = {
   .exciter_envelope_shape = 1.0f,
@@ -113,17 +112,16 @@ void OSC_INIT(uint32_t platform, uint32_t api)
   resonator_.Init();
 }
 
-static const float ipf[] = { -0.1255050746084462f, 0.08657999474887323f, 0.7498810367318182f };
+static const float ipf[] = { 0.10639816444506338f, 0.26598957651736876f, 0.3989644179169387f };
 #define lp_even(a,b,c) f32_to_q31(stmlib::SoftLimit((ipf[1] * a) + (ipf[2] * b) + (ipf[0] * c)))
 #define lp_odd(a,b,c)  f32_to_q31(stmlib::SoftLimit((ipf[0] * a) + (ipf[2] * b) + (ipf[1] * c)))
-
 
 void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t frames)
 {
   shape_lfo = q31_to_f32(params->shape_lfo);
 
   performance_state_.note = ((float)(params->pitch >> 8)) + ((params->pitch & 0xFF) * k_note_mod_fscale);
-  int32_t pitch = static_cast<int32_t>((performance_state_.note + 48.0f) * 256.0f);
+  int32_t pitch = static_cast<int32_t>((performance_state_.note + 41.0f) * 256.0f);
   if (pitch < 0) {
     pitch = 0;
   } else if (pitch >= 65535) {
@@ -133,14 +131,14 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
 
   //performance_state_.modulation = get_shape();
   //performance_state_.strength = get_strength();
-  patch_.exciter_envelope_shape = 1.0f;
-  patch_.exciter_strike_level = get_shift_shape();
+  //patch_.exciter_envelope_shape = 1.0f;
+  patch_.exciter_strike_level = get_strength();
   patch_.exciter_strike_meta = get_meta();
   patch_.exciter_strike_timbre = get_timbre();
   patch_.exciter_signature = 0.0f;
-  patch_.resonator_geometry = get_shape();
+  patch_.resonator_geometry = get_shift_shape();
   patch_.resonator_brightness = get_brightness();
-  patch_.resonator_position = get_position();
+  patch_.resonator_position = get_shape();
   patch_.resonator_damping = get_damping();
   
   uint8_t flags = GetGateFlags(performance_state_.gate);
@@ -198,10 +196,6 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
   for (size_t i=0; i<kMaxBlockSize; ++i) {
     yn[i*2] = lp_even(center[i], center[i+1], center[i+2]);
     yn[i*2+1] = lp_odd(center[i], center[i+1], center[i+2]);
-
-    //yn[i] = f32_to_q31(stmlib::SoftLimit(center[i]));
-    //yn[i*2] = f32_to_q31(stmlib::SoftLimit(center[i]));
-    //yn[i*2+1] = 0;
   }
   center[0] = center[kMaxBlockSize];
   center[1] = center[kMaxBlockSize+1];
@@ -251,18 +245,18 @@ inline float get_shape() {
 inline float get_shift_shape() {
   return clip01f(shiftshape + (p_values[k_osc_param_id6] == 1 ? shape_lfo : 0.0f));
 }
-inline float get_damping() {
+inline float get_strength() {
   return clip01f((p_values[k_osc_param_id1] * 0.01f) + (p_values[k_osc_param_id6] == 2 ? shape_lfo : 0.0f));
 }
-inline float get_timbre() {
+inline float get_damping() {
   return clip01f((p_values[k_osc_param_id2] * 0.01f) + (p_values[k_osc_param_id6] == 3 ? shape_lfo : 0.0f));
 }
-inline float get_meta() {
+inline float get_timbre() {
   return clip01f((p_values[k_osc_param_id3] * 0.01f) + (p_values[k_osc_param_id6] == 4 ? shape_lfo : 0.0f));
 }
-inline float get_brightness() {
+inline float get_meta() {
   return clip01f((p_values[k_osc_param_id4] * 0.01f) + (p_values[k_osc_param_id6] == 5 ? shape_lfo : 0.0f));
 }
-inline float get_position() {
+inline float get_brightness() {
   return clip01f((p_values[k_osc_param_id5] * 0.01f) + (p_values[k_osc_param_id6] == 6 ? shape_lfo : 0.0f));
 }
