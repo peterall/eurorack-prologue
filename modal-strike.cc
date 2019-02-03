@@ -74,13 +74,8 @@ inline uint8_t GetGateFlags(bool gate_in) {
   return flags;
 }
 
-void Seed(uint32_t* seed, size_t size) {
-  // Scramble all bits from the serial number.
-  uint32_t signature = 0xf0cacc1a;
-  for (size_t i = 0; i < size; ++i) {
-    signature ^= seed[i];
-    signature = signature * 1664525L + 1013904223L;
-  }
+void Seed() {
+  uint32_t signature = stmlib::Random::GetWord();
   float x;
 
   x = static_cast<float>(signature & 7) / 8.0f;
@@ -106,8 +101,8 @@ void Seed(uint32_t* seed, size_t size) {
 
 void OSC_INIT(uint32_t platform, uint32_t api)
 {
-  uint32_t random = 0x82eef2a3;
-  Seed(&random, 1);
+  stmlib::Random::Seed(_osc_mcu_hash());
+  Seed();
   strike_.Init();
   resonator_.Init();
 }

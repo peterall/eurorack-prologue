@@ -1,3 +1,4 @@
 build
 *.prlgunit
-eurorack_prologue.zip
+*.mnlgxdunit
+eurorack_*

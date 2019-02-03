@@ -1,5 +1,5 @@
 # #############################################################################
-# Prologue Oscillator Makefile
+# Oscillator Makefile
 # #############################################################################
 
 ifeq ($(OS),Windows_NT)
@@ -15,7 +15,7 @@ endif
 OSCILLATOR_UC = $(shell echo $(OSCILLATOR) | tr a-z A-Z)
 MANIFEST = manifest_$(OSCILLATOR).json
 
-PLATFORMDIR = logue-sdk/platform/prologue
+PLATFORMDIR = logue-sdk/platform/$(PLATFORM)
 PROJECTDIR = .
 TOOLSDIR = $(PLATFORMDIR)/../../tools
 EXTDIR = $(PLATFORMDIR)/../ext
@@ -93,8 +93,16 @@ TOPT = -mthumb -mno-thumb-interwork -DTHUMB_NO_INTERWORKING -DTHUMB_PRESENT
 # set targets and directories
 # #############################################################################
 
+ifeq ($(PLATFORM), prologue)
+    PKGSUFFIX = prlgunit
+endif
+
+ifeq ($(PLATFORM), minilogue-xd)
+    PKGSUFFIX = mnlgxdunit
+endif
+
 PKGDIR = $(PROJECT)
-PKGARCH = $(PROJECT).prlgunit
+PKGARCH = $(PROJECT).$(PKGSUFFIX)
 PAYLOAD = payload.bin
 BUILDDIR = $(PROJECTDIR)/build
 OBJDIR = $(BUILDDIR)/obj
@@ -231,7 +239,7 @@ clean:
 package:
 	@echo Packaging to ./$(PKGARCH)
 	@mkdir -p $(PKGDIR)
-	@cp -a $(MANIFEST) $(PKGDIR)/manifest.json
+	@cat $(MANIFEST) | jq '.header.platform="$(PLATFORM)"|.header.version="$(VERSION)"' > $(PKGDIR)/manifest.json
 	@cp -a $(BUILDDIR)/$(PROJECT).bin $(PKGDIR)/$(PAYLOAD)
 	@$(ZIP) $(ZIP_ARGS) $(PROJECT).zip $(PKGDIR)
 	@mv $(PROJECT).zip $(PKGARCH)
