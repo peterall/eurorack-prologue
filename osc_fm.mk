@@ -1,4 +1,5 @@
 OSCILLATOR = fm
+PROJECT = mo2_$(OSCILLATOR)
 
 UCXXSRC = macro-oscillator2.cc \
 	eurorack/plaits/dsp/engine/fm_engine.cc \

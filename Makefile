@@ -9,10 +9,12 @@ $(OSCILLATORS):
 
 .PHONY: $(TOPTARGETS) $(OSCILLATORS)
 
+PACKAGE=eurorack_prologue
+
 package:
-	@echo Packaging to ./mo2_prologue.zip
-	@rm -f mo2_prologue.zip
-	@mkdir mo2_prologue
-	@cp -a *.prlgunit mo2_prologue/
-	@cp -a credits.txt mo2_prologue/
-	@zip -rq9m mo2_prologue.zip mo2_prologue/
+	@echo Packaging to ./${PACKAGE}.zip
+	@rm -f ${PACKAGE}.zip
+	@mkdir ${PACKAGE}
+	@cp -a *.prlgunit ${PACKAGE}/
+	@cp -a credits.txt ${PACKAGE}/
+	@zip -rq9m ${PACKAGE}.zip ${PACKAGE}/

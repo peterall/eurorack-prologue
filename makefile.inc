@@ -12,7 +12,6 @@ else
     detected_OS := $(shell uname -s)
 endif
 
-PROJECT = mo2_$(OSCILLATOR)
 OSCILLATOR_UC = $(shell echo $(OSCILLATOR) | tr a-z A-Z)
 MANIFEST = manifest_$(OSCILLATOR).json
 
@@ -71,7 +70,7 @@ LDSCRIPT = $(LDDIR)/userosc.ld
 DLIBS = -lm
 
 DADEFS = -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 
-DDEFS = -DSTM32F401xC -DSTM32F401xx -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -D_USE_MATH_DEFINES -DOSC_$(OSCILLATOR_UC) -DOSCILLATOR_TYPE=$(OSCILLATOR) 
+DDEFS = -DSTM32F401xC -DSTM32F401xx -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -D_USE_MATH_DEFINES -DOSC_$(OSCILLATOR_UC) -DOSCILLATOR_TYPE=$(OSCILLATOR) -DM_PI=3.14159265358979323846
 
 COPT = -std=c11 -mstructure-size-boundary=8
 CXXOPT = -std=c++11 -fno-rtti -fno-exceptions -fno-non-call-exceptions -fno-use-cxa-atexit -ffunction-sections -fdata-sections -funroll-loops
