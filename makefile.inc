@@ -12,7 +12,6 @@ else
     detected_OS := $(shell uname -s)
 endif
 
-PROJECT = mo2_$(OSCILLATOR)
 OSCILLATOR_UC = $(shell echo $(OSCILLATOR) | tr a-z A-Z)
 MANIFEST = manifest_$(OSCILLATOR).json
 

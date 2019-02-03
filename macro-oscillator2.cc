@@ -119,9 +119,9 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
 
   update_parameters();
 
-  engine.Render(parameters, out, aux, (size_t)frames, &enveloped);
+  engine.Render(parameters, out, aux, plaits::kMaxBlockSize, &enveloped);
 
-  for(size_t i=0;i<frames;i++) {
+  for(size_t i=0;i<plaits::kMaxBlockSize;i++) {
     float o = out[i] * out_gain, a = aux[i] * aux_gain;
     yn[i] = f32_to_q31(stmlib::Crossfade(o, a, mix));
   }

@@ -12,7 +12,7 @@ inline float get_strength();
 inline float get_damping();
 inline float get_timbre();
 inline float get_brightness();
-inline float get_meta();
+inline float get_mallet();
 
 Exciter strike_;
 Resonator resonator_;
@@ -112,6 +112,22 @@ void OSC_INIT(uint32_t platform, uint32_t api)
   resonator_.Init();
 }
 
+/*
+
+FIR filter designed with
+http://t-filter.appspot.com
+
+sampling frequency: 48000 Hz
+
+* 0 Hz - 11000 Hz
+  gain = 1
+  actual ripple = 22.664844906794034 dB
+
+* 12000 Hz - 24000 Hz
+  gain = 0
+  actual attenuation = -28.499686493575386 dB
+*/
+
 static const float ipf[] = { 0.10639816444506338f, 0.26598957651736876f, 0.3989644179169387f };
 #define lp_even(a,b,c) f32_to_q31(stmlib::SoftLimit((ipf[1] * a) + (ipf[2] * b) + (ipf[0] * c)))
 #define lp_odd(a,b,c)  f32_to_q31(stmlib::SoftLimit((ipf[0] * a) + (ipf[2] * b) + (ipf[1] * c)))
@@ -129,17 +145,15 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
   }
   float frequency = lut_midi_to_f_high[pitch >> 8] * lut_midi_to_f_low[pitch & 0xff];
 
-  //performance_state_.modulation = get_shape();
-  //performance_state_.strength = get_strength();
   //patch_.exciter_envelope_shape = 1.0f;
   patch_.exciter_strike_level = get_strength();
-  patch_.exciter_strike_meta = get_meta();
+  patch_.exciter_strike_meta = get_mallet();
   patch_.exciter_strike_timbre = get_timbre();
-  patch_.exciter_signature = 0.0f;
-  patch_.resonator_geometry = get_shift_shape();
-  patch_.resonator_brightness = get_brightness();
-  patch_.resonator_position = get_shape();
+  //patch_.exciter_signature = 0.0f;
   patch_.resonator_damping = get_damping();
+  patch_.resonator_brightness = get_brightness();
+  patch_.resonator_geometry = get_shift_shape();
+  patch_.resonator_position = get_shape();
   
   uint8_t flags = GetGateFlags(performance_state_.gate);
 
@@ -248,13 +262,13 @@ inline float get_shift_shape() {
 inline float get_strength() {
   return clip01f((p_values[k_osc_param_id1] * 0.01f) + (p_values[k_osc_param_id6] == 2 ? shape_lfo : 0.0f));
 }
-inline float get_damping() {
+inline float get_mallet() {
   return clip01f((p_values[k_osc_param_id2] * 0.01f) + (p_values[k_osc_param_id6] == 3 ? shape_lfo : 0.0f));
 }
 inline float get_timbre() {
   return clip01f((p_values[k_osc_param_id3] * 0.01f) + (p_values[k_osc_param_id6] == 4 ? shape_lfo : 0.0f));
 }
-inline float get_meta() {
+inline float get_damping() {
   return clip01f((p_values[k_osc_param_id4] * 0.01f) + (p_values[k_osc_param_id6] == 5 ? shape_lfo : 0.0f));
 }
 inline float get_brightness() {

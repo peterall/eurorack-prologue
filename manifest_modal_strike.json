@@ -1,0 +1,21 @@
+{
+    "header" : 
+    {
+        "platform" : "prologue",
+        "module" : "osc",
+        "api" : "1.0-0",
+        "dev_id" : 0,
+        "prg_id" : 0,
+        "version" : "1.3-0",
+        "name" : "mod s",
+        "num_param" : 6,
+        "params" : [
+            ["Strength",     0, 100,  "%"],
+            ["Mallet",       0, 100,  "%"],
+            ["Timbre",       0, 100,  "%"],
+            ["Damping",      0, 100,  "%"],
+            ["Brightness",   0, 100,  "%"],
+            ["LFO Target",   0, 6,     ""]
+        ]
+    }
+}

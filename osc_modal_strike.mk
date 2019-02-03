@@ -1,6 +1,7 @@
-OSCILLATOR = modal
+OSCILLATOR = modal_strike
+PROJECT = $(OSCILLATOR)
 
-UCXXSRC = modal-oscillator.cc \
+UCXXSRC = modal-strike.cc \
 	eurorack/elements/dsp/exciter.cc \
 	eurorack/elements/dsp/resonator.cc \
 	eurorack/elements/dsp/tube.cc \

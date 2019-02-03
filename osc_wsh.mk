@@ -1,4 +1,5 @@
 OSCILLATOR = wsh
+PROJECT = mo2_$(OSCILLATOR)
 
 UCXXSRC = macro-oscillator2.cc \
 	eurorack/plaits/dsp/engine/waveshaping_engine.cc \

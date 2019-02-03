@@ -1,4 +1,5 @@
 OSCILLATOR = add
+PROJECT = mo2_$(OSCILLATOR)
 
 UCXXSRC = macro-oscillator2.cc \
 	eurorack/plaits/dsp/engine/additive_engine.cc \
