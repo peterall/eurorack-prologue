@@ -1,9 +1,9 @@
 Eurorack Oscillators for Korg prologue
 =================================
 
-This project are ports of some of Mutable Instruments (tm) oscillators to the Korg prologue multi-engine.
+Ports of some of Mutable Instruments (tm) oscillators to the Korg prologue multi-engine.
 
-See [releases](releases) for latest binaries.
+See [releases](https://github.com/peterall/eurorack-prologue/releases) for latest binaries.
 
 
 
@@ -49,12 +49,14 @@ Many parameters 'neutral' settings are in center position, such as `va` Detune o
 Modal Resonator (based on Elements)
 ====
 *Physical modeling synthesis*
+
 | Name | Oscillator |
 |--|--|
 | `mod s` | Strike exciter with modal resonator |
 
 Parameters
 ----
+
 | Parameter               | Parameter             | LFO Target | Notes |
 |-------------------------|-----------------------|------------|-------|
 | `Shape` knob            | Resonator position    | 1 | Position where the mallet strikes, has a comb-filtering effect.  |
@@ -86,6 +88,7 @@ Tips
 *When you first select the oscillator it will make no sound, all parameters are at 0%!* Increase the `Strength` and `Damping` parameters until you start hearing something.
 
 Try a nice pluck:
+
 | Parameter           |  Value |
 |---------------------|--------|
 | `Shape`             | 50%    |
