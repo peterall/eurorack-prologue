@@ -1,10 +1,12 @@
 #include "userosc.h"
 #include "stmlib/dsp/dsp.h"
+#include "stmlib/utils/random.h"
 #include "plaits/dsp/dsp.h"
 #include "plaits/dsp/engine/engine.h"
 
 uint16_t p_values[6] = {0};
 float shape = 0, shiftshape = 0, shape_lfo = 0, mix = 0;
+bool gate = false, previous_gate = false;
 
 plaits::EngineParameters parameters = {
     .trigger = plaits::TRIGGER_UNPATCHED, 
@@ -100,13 +102,65 @@ void update_parameters() {
 }
 #endif
 
+#if defined(OSC_STRING)
+#define USE_LIMITER
+#include "plaits/dsp/engine/string_engine.h"
+plaits::StringEngine engine;
+void update_parameters() {
+  parameters.harmonics = get_param_id1();
+  parameters.timbre = get_shift_shape();
+  parameters.morph = get_shape();
+  mix = get_param_id2();
+}
+#endif
+
+#if defined(OSC_MODAL)
+#define USE_LIMITER
+#include "plaits/dsp/engine/modal_engine.h"
+plaits::ModalEngine engine;
+void update_parameters() {
+  parameters.harmonics = get_param_id1();
+  parameters.timbre = get_shift_shape();
+  parameters.morph = get_shape();
+  mix = get_param_id2();
+}
+#endif
+
+#if defined(USE_LIMITER)
+#include "stmlib/dsp/limiter.h"
+stmlib::Limiter limiter_;
+#endif
 
 void OSC_INIT(uint32_t platform, uint32_t api)
 {
-  static uint8_t engine_buffer[plaits::kMaxBlockSize*sizeof(float)];
+#if defined(OSC_STRING)
+  stmlib::Random::Seed(0x82eef2a3);
+  static uint8_t engine_buffer[4096*sizeof(float)] = {0};
+#else 
+ #if defined(OSC_MODAL)
+  stmlib::Random::Seed(0x82eef2a3);
+  static uint8_t engine_buffer[plaits::kMaxBlockSize*sizeof(float)] = {0};
+ #else
+  static uint8_t engine_buffer[plaits::kMaxBlockSize*sizeof(float)] = {0};
+ #endif
+#endif
+
+#if defined(USE_LIMITER)
+  limiter_.Init();
+#endif
+
   stmlib::BufferAllocator allocator;
   allocator.Init(engine_buffer, sizeof(engine_buffer));
   engine.Init(&allocator);
+}
+
+void OSC_NOTEON(const user_osc_param_t * const params)
+{
+  gate = true;
+}
+void OSC_NOTEOFF(const user_osc_param_t * const params)
+{
+  gate = false;
 }
 
 void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t frames)
@@ -117,14 +171,31 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
   shape_lfo = q31_to_f32(params->shape_lfo);
   parameters.note = ((float)(params->pitch >> 8)) + ((params->pitch & 0xFF) * k_note_mod_fscale);
 
+  if(gate && !previous_gate) {
+    parameters.trigger = plaits::TRIGGER_RISING_EDGE;
+  } else {
+    parameters.trigger = plaits::TRIGGER_LOW;
+  }
+  previous_gate = gate;
+
   update_parameters();
 
-  engine.Render(parameters, out, aux, plaits::kMaxBlockSize, &enveloped);
+  //engine.Render(parameters, out, aux, plaits::kMaxBlockSize, &enveloped);
+  arm_fill_f32(.0f, out, plaits::kMaxBlockSize);
+  arm_fill_f32(.0f, aux, plaits::kMaxBlockSize);
 
+
+#if defined(USE_LIMITER)
+  limiter_.Process(1.0 - mix, out, plaits::kMaxBlockSize);
+  for(size_t i=0;i<plaits::kMaxBlockSize;i++) {
+    yn[i] = f32_to_q31(out[i]);
+  }
+#else
   for(size_t i=0;i<plaits::kMaxBlockSize;i++) {
     float o = out[i] * out_gain, a = aux[i] * aux_gain;
     yn[i] = f32_to_q31(stmlib::Crossfade(o, a, mix));
   }
+#endif
 }
 
 inline float percentage_to_f32(int16_t value) {

@@ -106,8 +106,8 @@ void Seed(uint32_t* seed, size_t size) {
 
 void OSC_INIT(uint32_t platform, uint32_t api)
 {
-  stmlib::Random::Seed(_osc_mcu_hash());
   uint32_t random = 0x82eef2a3;
+  stmlib::Random::Seed(random);
   Seed(&random, 1);
   strike_.Init();
   resonator_.Init();

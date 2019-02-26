@@ -1,0 +1,18 @@
+{
+    "header" : 
+    {
+        "platform" : "prologue",
+        "module" : "osc",
+        "api" : "1.0-0",
+        "dev_id" : 0,
+        "prg_id" : 0,
+        "version" : "1.3-0",
+        "name" : "mo2str",
+        "num_param" : 3,
+        "params" : [
+            ["Decay" ,      0, 100,  "%"],
+            ["Attenuation", 0, 100,  "%"],
+            ["LFO Target",  0, 3,  ""]
+        ]
+    }
+}
