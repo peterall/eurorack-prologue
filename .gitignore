@@ -2,3 +2,4 @@ build
 *.prlgunit
 *.mnlgxdunit
 eurorack_*
+.vscode/ipch

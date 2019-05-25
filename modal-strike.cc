@@ -205,7 +205,7 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
   resonator_.Process(bow_strength_buffer_, raw, center+2, NULL, kMaxBlockSize);
 
   for (size_t i=0; i<kMaxBlockSize; ++i) {
-    center[i+2] += strike_bleed * strike_buffer_[i];
+    center[i+2] = (center[i+2] + (strike_bleed * strike_buffer_[i])) * 2.0f;
   }
 
   for (size_t i=0; i<kMaxBlockSize; ++i) {

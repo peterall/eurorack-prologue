@@ -180,9 +180,9 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
 
   update_parameters();
 
-  //engine.Render(parameters, out, aux, plaits::kMaxBlockSize, &enveloped);
-  arm_fill_f32(.0f, out, plaits::kMaxBlockSize);
-  arm_fill_f32(.0f, aux, plaits::kMaxBlockSize);
+  engine.Render(parameters, out, aux, plaits::kMaxBlockSize, &enveloped);
+  //arm_fill_f32(.0f, out, plaits::kMaxBlockSize);
+  //arm_fill_f32(.0f, aux, plaits::kMaxBlockSize);
 
 
 #if defined(USE_LIMITER)

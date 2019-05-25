@@ -1,3 +1,5 @@
+# disabled as it's not currently working
+
 OSCILLATOR = modal
 PROJECT = mo2_$(OSCILLATOR)
 
@@ -8,7 +10,5 @@ UCXXSRC = macro-oscillator2.cc \
 	eurorack/plaits/resources.cc \
 	eurorack/stmlib/dsp/units.cc \
 	eurorack/stmlib/utils/random.cc 
-
-UCSRC = logue-sdk/platform/ext/CMSIS/CMSIS/DSP_Lib/Source/SupportFunctions/arm_fill_f32.c
 
 include makefile.inc

@@ -112,6 +112,7 @@ ASMSRC = $(UASMSRC)
 
 ASMXSRC = $(UASMXSRC)
 
+UCSRC = logue-sdk/platform/ext/CMSIS/CMSIS/DSP_Lib/Source/SupportFunctions/arm_fill_f32.c
 CSRC = $(TEMPLATEDIR)/tpl/_unit.c $(UCSRC)
 
 CXXSRC = $(UCXXSRC)
