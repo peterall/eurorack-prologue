@@ -1,5 +1,6 @@
 #include "userosc.h"
 #include "stmlib/dsp/dsp.h"
+#include "stmlib/dsp/limiter.h"
 #include "stmlib/utils/dsp.h"
 #include "elements/dsp/part.h"
 #include "elements/resources.h"
@@ -16,6 +17,7 @@ inline float get_mallet();
 
 Exciter strike_;
 Resonator resonator_;
+stmlib::Limiter limiter_;
 
 bool previous_gate_ = false;
 float exciter_level_ = 0.f;
@@ -111,6 +113,7 @@ void OSC_INIT(uint32_t platform, uint32_t api)
   Seed(&random, 1);
   strike_.Init();
   resonator_.Init();
+  limiter_.Init();
 }
 
 /*
@@ -205,8 +208,10 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
   resonator_.Process(bow_strength_buffer_, raw, center+2, NULL, kMaxBlockSize);
 
   for (size_t i=0; i<kMaxBlockSize; ++i) {
-    center[i+2] = (center[i+2] + (strike_bleed * strike_buffer_[i])) * 2.0f;
+    center[i+2] = (center[i+2] + (strike_bleed * strike_buffer_[i]));
   }
+  limiter_.Process(2.f, center+2, kMaxBlockSize);
+
 
   for (size_t i=0; i<kMaxBlockSize; ++i) {
     yn[i*2] = lp_even(center[i], center[i+1], center[i+2]);
