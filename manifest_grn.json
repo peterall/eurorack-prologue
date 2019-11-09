@@ -8,11 +8,14 @@
         "prg_id" : 0,
         "version" : "1.3-0",
         "name" : "mo2grn",
-        "num_param" : 3,
+        "num_param" : 6,
         "params" : [
-            ["Width",      0, 100,  "%"],
-            ["Filter",     0, 100,  "%"],
-            ["LFO Target", 0, 3,     ""]     
+            ["Width",       -100, 100,  "%"],
+            ["Filter",      0, 100,  "%"],
+            ["LFO Target",  0, 7,     ""],
+            ["LFO2 Freq",   0, 100,  "%"],
+            ["LFO2 Depth",  0, 100,  "%"],
+            ["LFO2 Target", 0, 5,     ""]
         ]
     }
 }

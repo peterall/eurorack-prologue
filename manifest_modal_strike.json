@@ -10,12 +10,12 @@
         "name" : "mod st",
         "num_param" : 6,
         "params" : [
-            ["Strength",     0, 100,  "%"],
-            ["Mallet",       0, 100,  "%"],
-            ["Timbre",       0, 100,  "%"],
-            ["Damping",      0, 100,  "%"],
-            ["Brightness",   0, 100,  "%"],
-            ["LFO Target",   0, 6,     ""]
+            ["Strength",    0, 100,  "%"],
+            ["Mallet",      0, 100,  "%"],
+            ["Timbre",      0, 100,  "%"],
+            ["Damping",     0, 100,  "%"],
+            ["Brightness",  0, 100,  "%"],
+            ["LFO Target",  0, 6,     ""]
         ]
     }
 }

@@ -1,5 +1,6 @@
 build
 *.prlgunit
 *.mnlgxdunit
+*.ntkdigunit
 eurorack_*
 .vscode/ipch

@@ -1,7 +1,8 @@
-OSCILLATOR = modal_strike
+OSCILLATOR = modal_strike_24_nolimit
+MANIFEST = manifest_modal_strike.json
 PROJECT = $(OSCILLATOR)
 
-OSC_DDEFS = -DELEMENTS_RESONATOR_MODES=24 -DUSE_LIMITER
+OSC_DDEFS = -DELEMENTS_RESONATOR_MODES=24
 
 UCXXSRC = modal-strike.cc \
 	eurorack/elements/dsp/exciter.cc \

@@ -6,7 +6,7 @@
 #include "plaits/dsp/engine/engine.h"
 
 uint16_t p_values[6] = {0};
-float shape = 0, shiftshape = 0, shape_lfo = 0, mix = 0;
+float shape = 0, shiftshape = 0, shape_lfo = 0, lfo2 = 0, mix = 0;
 bool gate = false, previous_gate = false;
 
 plaits::EngineParameters parameters = {
@@ -20,25 +20,40 @@ plaits::EngineParameters parameters = {
 
 stmlib::CosineOscillator lfo;
 
-inline float get_shape() {
-  return clip01f(shape + (p_values[k_osc_param_id3] == 0 ? shape_lfo : 0.0f));
-}
-inline float get_shift_shape() {
-  return clip01f(shiftshape + (p_values[k_osc_param_id3] == 1 ? shape_lfo : 0.0f));
-}
-inline float get_param_id1() {
-  return clip01f((p_values[k_osc_param_id1] * 0.01f) + (p_values[k_osc_param_id3] == 2 ? shape_lfo : 0.0f));
-}
-inline float get_param_id2() {
-  return clip01f((p_values[k_osc_param_id2] * 0.01f) + (p_values[k_osc_param_id3] == 3 ? shape_lfo : 0.0f));
-}
-inline float get_param_id4() {
-  return clip01f((p_values[k_osc_param_id4] * 0.01f) + (p_values[k_osc_param_id3] == 4 ? shape_lfo : 0.0f));
-}
-inline float get_param_id5() {
-  return clip01f((p_values[k_osc_param_id5] * 0.01f) + (p_values[k_osc_param_id3] == 5 ? shape_lfo : 0.0f));
+enum LfoTarget {
+  LfoTargetShape,
+  LfoTargetShiftShape,
+  LfoTargetParam1,
+  LfoTargetParam2,
+  LfoTargetPitch,
+  LfoTargetAmplitude,
+  LfoTargetLfo2Frequency,
+  LfoTargetLfo2Depth
+};
+
+inline float get_lfo_value(enum LfoTarget target) {
+  return (p_values[k_user_osc_param_id3] == target ? shape_lfo : 0.0f) +
+    (p_values[k_user_osc_param_id6] == target ? lfo2 : 0.0f);
 }
 
+inline float get_shape() {
+  return clip01f(shape + get_lfo_value(LfoTargetShape));
+}
+inline float get_shift_shape() {
+  return clip01f(shiftshape + get_lfo_value(LfoTargetShiftShape));
+}
+inline float get_param_id1() {
+  return clip01f((p_values[k_user_osc_param_id1] * 0.005f) + get_lfo_value(LfoTargetParam1));
+}
+inline float get_param_id2() {
+  return clip01f((p_values[k_user_osc_param_id2] * 0.01f) + get_lfo_value(LfoTargetParam2));
+}
+inline float get_param_lfo2_frequency() {
+  return clip01f((p_values[k_user_osc_param_id4] * 0.01f) + get_lfo_value(LfoTargetLfo2Frequency));
+}
+inline float get_param_lfo2_depth() {
+  return clip01f((p_values[k_user_osc_param_id5] * 0.01f) + get_lfo_value(LfoTargetLfo2Depth));
+}
 
 #ifdef OSC_VA
 #include "plaits/dsp/engine/virtual_analog_engine.h"
@@ -105,7 +120,7 @@ void update_parameters() {
 plaits::WavetableEngine engine;
 float out_gain = 0.6f, aux_gain = 0.6f;
 void update_parameters() {
-  parameters.harmonics = p_values[k_osc_param_id1] == 0 ? (0.5f - 0.0625f) : (0.5f + 0.0625f);
+  parameters.harmonics = p_values[k_user_osc_param_id1] == 0 ? (0.5f - 0.0625f) : (0.5f + 0.0625f);
   parameters.timbre = get_shape();
   parameters.morph = get_shift_shape();
   mix = get_param_id2();
@@ -114,6 +129,7 @@ void update_parameters() {
 
 #if defined(OSC_STRING)
 #define USE_LIMITER
+//float out_gain = 0.5f, aux_gain = 0.5f;
 #include "plaits/dsp/engine/string_engine.h"
 plaits::StringEngine engine;
 void update_parameters() {
@@ -164,6 +180,8 @@ void OSC_INIT(uint32_t platform, uint32_t api)
   engine.Init(&allocator);
   lfo.InitApproximate(0);
   lfo.Start();
+
+  p_values[0] = 100;
 }
 
 void OSC_NOTEON(const user_osc_param_t * const params)
@@ -181,17 +199,12 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
   static float out[plaits::kMaxBlockSize], aux[plaits::kMaxBlockSize];
   static bool enveloped;
 
-  float lfo1_freq = get_param_id4() * 5.0f;
-  float lfo1_depth = get_param_id5();
-
-  //lfo.InitApproximate(lfo1_freq * lfo1_freq * lfo1_freq);
-
-  lfo.InitApproximate(get_param_id4() / 600.f);
-
   shape_lfo = q31_to_f32(params->shape_lfo);
+  lfo.InitApproximate(get_param_lfo2_frequency() / 600.f);
+  lfo2 = (lfo.Next() - 0.5f) * 2.0f * get_param_lfo2_depth();
+ 
   parameters.note = ((float)(params->pitch >> 8)) + ((params->pitch & 0xFF) * k_note_mod_fscale);
-
-  parameters.note += (lfo.Next() - 0.5f) * lfo1_depth;
+  parameters.note += (get_lfo_value(LfoTargetPitch) * 0.5);
 
   if(gate && !previous_gate) {
     parameters.trigger = plaits::TRIGGER_RISING_EDGE;
@@ -203,9 +216,6 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
   update_parameters();
 
   engine.Render(parameters, out, aux, plaits::kMaxBlockSize, &enveloped);
-  //arm_fill_f32(.0f, out, plaits::kMaxBlockSize);
-  //arm_fill_f32(.0f, aux, plaits::kMaxBlockSize);
-
 
 #if defined(USE_LIMITER)
   limiter_.Process(1.0 - mix, out, plaits::kMaxBlockSize);
@@ -228,20 +238,20 @@ void OSC_PARAM(uint16_t index, uint16_t value)
 {
   switch (index)
   {
-  case k_osc_param_id1:
-  case k_osc_param_id2:
-  case k_osc_param_id3:
-  case k_osc_param_id4:
-  case k_osc_param_id5:
-  case k_osc_param_id6:
+  case k_user_osc_param_id1:
+  case k_user_osc_param_id2:
+  case k_user_osc_param_id3:
+  case k_user_osc_param_id4:
+  case k_user_osc_param_id5:
+  case k_user_osc_param_id6:
     p_values[index] = value;
     break;
 
-  case k_osc_param_shape:
+  case k_user_osc_param_shape:
     shape = param_val_to_f32(value);
     break;
 
-  case k_osc_param_shiftshape:
+  case k_user_osc_param_shiftshape:
     shiftshape = param_val_to_f32(value);
     break;
 

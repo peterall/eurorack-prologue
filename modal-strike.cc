@@ -17,7 +17,10 @@ inline float get_mallet();
 
 Exciter strike_;
 Resonator resonator_;
+
+#if defined(USE_LIMITER)
 stmlib::Limiter limiter_;
+#endif
 
 bool previous_gate_ = false;
 float exciter_level_ = 0.f;
@@ -113,7 +116,10 @@ void OSC_INIT(uint32_t platform, uint32_t api)
   Seed(&random, 1);
   strike_.Init();
   resonator_.Init();
+  
+#if defined(USE_LIMITER)
   limiter_.Init();
+#endif
 }
 
 /*
@@ -177,8 +183,10 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
   strike_level = patch_.exciter_strike_level * 1.25f;
   strike_bleed = strike_level > 1.0f ? (strike_level - 1.0f) * 2.0f : 0.0f;
   strike_level = strike_level < 1.0f ? strike_level : 1.0f;
-  strike_level *= 1.5f;
 
+#if defined(USE_LIMITER)
+  strike_level *= 1.5f;
+#endif
 
   // Sum all sources of excitation.
   for (size_t i = 0; i < kMaxBlockSize; ++i) {
@@ -210,8 +218,10 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
   for (size_t i=0; i<kMaxBlockSize; ++i) {
     center[i+2] = (center[i+2] + (strike_bleed * strike_buffer_[i]));
   }
-  limiter_.Process(2.f, center+2, kMaxBlockSize);
 
+#if defined(USE_LIMITER)
+  limiter_.Process(2.f, center+2, kMaxBlockSize);
+#endif
 
   for (size_t i=0; i<kMaxBlockSize; ++i) {
     yn[i*2] = lp_even(center[i], center[i+1], center[i+2]);
@@ -237,20 +247,20 @@ void OSC_PARAM(uint16_t index, uint16_t value)
 {
   switch (index)
   {
-  case k_osc_param_id1:
-  case k_osc_param_id2:
-  case k_osc_param_id3:
-  case k_osc_param_id4:
-  case k_osc_param_id5:
-  case k_osc_param_id6:
+  case k_user_osc_param_id1:
+  case k_user_osc_param_id2:
+  case k_user_osc_param_id3:
+  case k_user_osc_param_id4:
+  case k_user_osc_param_id5:
+  case k_user_osc_param_id6:
     p_values[index] = value;
     break;
 
-  case k_osc_param_shape:
+  case k_user_osc_param_shape:
     shape = param_val_to_f32(value);
     break;
 
-  case k_osc_param_shiftshape:
+  case k_user_osc_param_shiftshape:
     shiftshape = param_val_to_f32(value);
     break;
 
@@ -260,23 +270,23 @@ void OSC_PARAM(uint16_t index, uint16_t value)
 }
 
 inline float get_shape() {
-  return clip01f(shape + (p_values[k_osc_param_id6] == 0 ? shape_lfo : 0.0f));
+  return clip01f(shape + (p_values[k_user_osc_param_id6] == 0 ? shape_lfo : 0.0f));
 }
 inline float get_shift_shape() {
-  return clip01f(shiftshape + (p_values[k_osc_param_id6] == 1 ? shape_lfo : 0.0f));
+  return clip01f(shiftshape + (p_values[k_user_osc_param_id6] == 1 ? shape_lfo : 0.0f));
 }
 inline float get_strength() {
-  return clip01f((p_values[k_osc_param_id1] * 0.01f) + (p_values[k_osc_param_id6] == 2 ? shape_lfo : 0.0f));
+  return clip01f((p_values[k_user_osc_param_id1] * 0.01f) + (p_values[k_user_osc_param_id6] == 2 ? shape_lfo : 0.0f));
 }
 inline float get_mallet() {
-  return clip01f((p_values[k_osc_param_id2] * 0.01f) + (p_values[k_osc_param_id6] == 3 ? shape_lfo : 0.0f));
+  return clip01f((p_values[k_user_osc_param_id2] * 0.01f) + (p_values[k_user_osc_param_id6] == 3 ? shape_lfo : 0.0f));
 }
 inline float get_timbre() {
-  return clip01f((p_values[k_osc_param_id3] * 0.01f) + (p_values[k_osc_param_id6] == 4 ? shape_lfo : 0.0f));
+  return clip01f((p_values[k_user_osc_param_id3] * 0.01f) + (p_values[k_user_osc_param_id6] == 4 ? shape_lfo : 0.0f));
 }
 inline float get_damping() {
-  return clip01f((p_values[k_osc_param_id4] * 0.01f) + (p_values[k_osc_param_id6] == 5 ? shape_lfo : 0.0f));
+  return clip01f((p_values[k_user_osc_param_id4] * 0.01f) + (p_values[k_user_osc_param_id6] == 5 ? shape_lfo : 0.0f));
 }
 inline float get_brightness() {
-  return clip01f((p_values[k_osc_param_id5] * 0.01f) + (p_values[k_osc_param_id6] == 6 ? shape_lfo : 0.0f));
+  return clip01f((p_values[k_user_osc_param_id5] * 0.01f) + (p_values[k_user_osc_param_id6] == 6 ? shape_lfo : 0.0f));
 }

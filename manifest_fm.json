@@ -8,11 +8,14 @@
         "prg_id" : 0,
         "version" : "1.3-0",
         "name" : "mo2fm",
-        "num_param" : 3,
+        "num_param" : 6,
         "params" : [
-            ["Feedback",   0, 100,  "%"],
-            ["Sub",        0, 100,  "%"],
-            ["LFO Target", 0, 3,     ""]        
+            ["Feedback",    -100, 100,  "%"],
+            ["Sub",         0, 100,  "%"],
+            ["LFO Target",  0, 7,     ""],
+            ["LFO2 Freq",   0, 100,  "%"],
+            ["LFO2 Depth",  0, 100,  "%"],
+            ["LFO2 Target", 0, 5,     ""]   
         ]
     }
 }

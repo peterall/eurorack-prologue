@@ -3,8 +3,7 @@
         {
             "name": "gcc-arm-none-eabi",
             "includePath": [
-                "${workspaceFolder}/logue-sdk/platform/prologue/osc/inc",
-                "${workspaceFolder}/logue-sdk/platform/prologue/osc/inc/api",
+                "${workspaceFolder}/logue-sdk/platform/prologue/inc",
                 "${workspaceFolder}/eurorack",
                 "${workspaceFolder}/eurorack/stmlib/third_party/STM",
                 "${workspaceFolder}/eurorack/stmlib/third_party/STM/CMSIS/CM3_f4xx",
