@@ -1,5 +1,6 @@
 #include "userosc.h"
 #include "stmlib/dsp/dsp.h"
+#include "stmlib/dsp/cosine_oscillator.h"
 #include "stmlib/utils/random.h"
 #include "plaits/dsp/dsp.h"
 #include "plaits/dsp/engine/engine.h"
@@ -17,6 +18,8 @@ plaits::EngineParameters parameters = {
     .accent = 0
 };
 
+stmlib::CosineOscillator lfo;
+
 inline float get_shape() {
   return clip01f(shape + (p_values[k_osc_param_id3] == 0 ? shape_lfo : 0.0f));
 }
@@ -29,6 +32,13 @@ inline float get_param_id1() {
 inline float get_param_id2() {
   return clip01f((p_values[k_osc_param_id2] * 0.01f) + (p_values[k_osc_param_id3] == 3 ? shape_lfo : 0.0f));
 }
+inline float get_param_id4() {
+  return clip01f((p_values[k_osc_param_id4] * 0.01f) + (p_values[k_osc_param_id3] == 4 ? shape_lfo : 0.0f));
+}
+inline float get_param_id5() {
+  return clip01f((p_values[k_osc_param_id5] * 0.01f) + (p_values[k_osc_param_id3] == 5 ? shape_lfo : 0.0f));
+}
+
 
 #ifdef OSC_VA
 #include "plaits/dsp/engine/virtual_analog_engine.h"
@@ -152,11 +162,14 @@ void OSC_INIT(uint32_t platform, uint32_t api)
   stmlib::BufferAllocator allocator;
   allocator.Init(engine_buffer, sizeof(engine_buffer));
   engine.Init(&allocator);
+  lfo.InitApproximate(0);
+  lfo.Start();
 }
 
 void OSC_NOTEON(const user_osc_param_t * const params)
 {
   gate = true;
+  lfo.Start();
 }
 void OSC_NOTEOFF(const user_osc_param_t * const params)
 {
@@ -168,8 +181,17 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
   static float out[plaits::kMaxBlockSize], aux[plaits::kMaxBlockSize];
   static bool enveloped;
 
+  float lfo1_freq = get_param_id4() * 5.0f;
+  float lfo1_depth = get_param_id5();
+
+  //lfo.InitApproximate(lfo1_freq * lfo1_freq * lfo1_freq);
+
+  lfo.InitApproximate(get_param_id4() / 600.f);
+
   shape_lfo = q31_to_f32(params->shape_lfo);
   parameters.note = ((float)(params->pitch >> 8)) + ((params->pitch & 0xFF) * k_note_mod_fscale);
+
+  parameters.note += (lfo.Next() - 0.5f) * lfo1_depth;
 
   if(gate && !previous_gate) {
     parameters.trigger = plaits::TRIGGER_RISING_EDGE;
