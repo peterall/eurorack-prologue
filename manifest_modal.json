@@ -13,8 +13,8 @@
             ["Decay" ,      -100, 100,  "%"],
             ["Attenuation", 0, 100,  "%"],
             ["LFO Target",  0, 7,     ""],
-            ["LFO2 Freq",   0, 100,  "%"],
-            ["LFO2 Depth",  0, 100,  "%"],
+            ["LFO2 Rate",   0, 100,  "%"],
+            ["LFO2 Int",    0, 100,  "%"],
             ["LFO2 Target", 0, 5,     ""]
         ]
     }
