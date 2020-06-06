@@ -142,7 +142,7 @@ static const float ipf[] = { 0.10639816444506338f, 0.26598957651736876f, 0.39896
 #define lp_even(a,b,c) f32_to_q31(stmlib::SoftLimit((ipf[1] * a) + (ipf[2] * b) + (ipf[0] * c)))
 #define lp_odd(a,b,c)  f32_to_q31(stmlib::SoftLimit((ipf[0] * a) + (ipf[2] * b) + (ipf[1] * c)))
 
-void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t frames)
+__fast_inline void cycle(const user_osc_param_t *const params, int32_t *yn, const uint32_t frames)
 {
   shape_lfo = q31_to_f32(params->shape_lfo);
 
@@ -229,6 +229,17 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
   }
   center[0] = center[kMaxBlockSize];
   center[1] = center[kMaxBlockSize+1];
+}
+
+void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t frames)
+{
+    int32_t frames_to_go = frames;
+    while(frames_to_go > 0) {
+        cycle(params, yn, (frames_to_go > kMaxBlockSize) ? \
+              kMaxBlockSize : frames_to_go);
+        frames_to_go -= 2 * kMaxBlockSize;
+        yn += 2 * kMaxBlockSize;
+    }
 }
 
 void OSC_NOTEON(const user_osc_param_t * const params)

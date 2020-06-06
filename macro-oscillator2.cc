@@ -194,7 +194,7 @@ void OSC_NOTEOFF(const user_osc_param_t * const params)
   gate = false;
 }
 
-void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t frames)
+__fast_inline void cycle(const user_osc_param_t *const params, int32_t *yn, const uint32_t frames)
 {
   static float out[plaits::kMaxBlockSize], aux[plaits::kMaxBlockSize];
   static bool enveloped;
@@ -215,19 +215,30 @@ void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t
 
   update_parameters();
 
-  engine.Render(parameters, out, aux, plaits::kMaxBlockSize, &enveloped);
+  engine.Render(parameters, out, aux, frames, &enveloped);
 
 #if defined(USE_LIMITER)
-  limiter_.Process(1.0 - mix, out, plaits::kMaxBlockSize);
-  for(size_t i=0;i<plaits::kMaxBlockSize;i++) {
+  limiter_.Process(1.0 - mix, out, frames);
+  for(size_t i=0;i<frames;i++) {
     yn[i] = f32_to_q31(out[i]);
   }
 #else
-  for(size_t i=0;i<plaits::kMaxBlockSize;i++) {
+  for(size_t i=0;i<frames;i++) {
     float o = out[i] * out_gain, a = aux[i] * aux_gain;
     yn[i] = f32_to_q31(stmlib::Crossfade(o, a, mix));
   }
 #endif
+}
+
+void OSC_CYCLE(const user_osc_param_t *const params, int32_t *yn, const uint32_t frames)
+{
+    int32_t frames_to_go = frames;
+    while(frames_to_go > 0) {
+        cycle(params, yn, (frames_to_go > plaits::kMaxBlockSize) ? \
+              plaits::kMaxBlockSize : frames_to_go);
+        frames_to_go -= plaits::kMaxBlockSize;
+        yn += plaits::kMaxBlockSize;
+    }
 }
 
 inline float percentage_to_f32(int16_t value) {
