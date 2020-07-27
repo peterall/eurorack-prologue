@@ -2,7 +2,7 @@ TOPTARGETS := all clean
 
 OSCILLATORS := $(wildcard *mk)
 
-VERSION=1.5-0
+VERSION=1.6-0
 
 $(TOPTARGETS): $(OSCILLATORS) package_prologue package_minilogue-xd package_nutekt-digital
 $(OSCILLATORS):

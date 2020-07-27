@@ -120,7 +120,7 @@ void update_parameters() {
 plaits::WavetableEngine engine;
 float out_gain = 0.6f, aux_gain = 0.6f;
 void update_parameters() {
-  parameters.harmonics = p_values[k_user_osc_param_id1] == 0 ? (0.5f - 0.0625f) : (0.5f + 0.0625f);
+  parameters.harmonics = p_values[k_user_osc_param_id1] == 0 ? 1.f : 0.f;
   parameters.timbre = get_shape();
   parameters.morph = get_shift_shape();
   mix = get_param_id2();

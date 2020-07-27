@@ -39,10 +39,23 @@ endif
 endif
 
 # #############################################################################
-# Include project specific definition
+# Set platform specific options
 # #############################################################################
 
-#include ./project.mk
+ifeq ($(PLATFORM), prologue)
+    PKGSUFFIX = prlgunit
+	BLOCKSIZE = 16
+endif
+
+ifeq ($(PLATFORM), minilogue-xd)
+    PKGSUFFIX = mnlgxdunit
+	BLOCKSIZE = 16
+endif
+
+ifeq ($(PLATFORM), nutekt-digital)
+    PKGSUFFIX = ntkdigunit
+	BLOCKSIZE = 64
+endif
 
 # #############################################################################
 # configure cross compilation
@@ -74,7 +87,7 @@ DLIBS = -lm
 DADEFS = -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 
 DDEFS = -DSTM32F401xC -DSTM32F401xx \
     -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -D_USE_MATH_DEFINES -DM_PI=3.14159265358979323846 \
-    -DOSC_$(OSCILLATOR_UC) -DOSCILLATOR_TYPE=$(OSCILLATOR)
+    -DOSC_$(OSCILLATOR_UC) -DOSCILLATOR_TYPE=$(OSCILLATOR) -DBLOCKSIZE=$(BLOCKSIZE)
 
 DDEFS += $(OSC_DDEFS)
 
@@ -98,18 +111,6 @@ TOPT = -mthumb -mno-thumb-interwork -DTHUMB_NO_INTERWORKING -DTHUMB_PRESENT
 # #############################################################################
 # set targets and directories
 # #############################################################################
-
-ifeq ($(PLATFORM), prologue)
-    PKGSUFFIX = prlgunit
-endif
-
-ifeq ($(PLATFORM), minilogue-xd)
-    PKGSUFFIX = mnlgxdunit
-endif
-
-ifeq ($(PLATFORM), nutekt-digital)
-    PKGSUFFIX = ntkdigunit
-endif
 
 PKGDIR = $(PROJECT)
 PKGARCH = $(PROJECT).$(PKGSUFFIX)
