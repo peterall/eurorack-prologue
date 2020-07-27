@@ -16,10 +16,15 @@ Macro Oscillator 2 (based on Plaits)
 | `mo2_fm` | Two operator FM | Modulation index | Frequency ratio |
 | `mo2_grn` | Granular formant oscillator | Frequency ratio | Formant frequency |
 | `mo2_add` | Harmonic oscillator |Index of prominent harmonic  | Bump shape |
-| `mo2_wta`-`mo2_wtf`* | Wavetable oscillator | Row index | Column index |
+| `mo2_wta`* | Wavetable: Additive (2x sine, quadratic, comb) | Row index | Column index |
+| `mo2_wtb`* | Wavetable: Additive (pair, triangle stack, 2x drawbar) | Row index | Column index |
+| `mo2_wtc`* | Wavetable: Formantish (trisaw, sawtri, burst, bandpass formant) | Row index | Column index |
+| `mo2_wtd`* | Wavetable: Formantish (formant, digi_formant, pulse, sine power) | Row index | Column index |
+| `mo2_wte`* | Wavetable: Braids (male, choir, digi, drone) | Row index | Column index |
+| `mo2_wtf`* | Wavetable: Braids (metal, fant, 2x unknown) | Row index | Column index |
 | `mo2_string` | Inharmonic string model | Decay | Brightness |
 
-\* Due to the 32k size constraint in the multi-engine the Wavetable oscillator is split into 6 oscillators with 4 'rows' each.
+\* Due to the 32k size constraint in the multi-engine the Wavetable oscillator is split into 6 oscillators of 8 rows (scannable by Shape) by 4 columns (scannable by Shift-shape)
 
 Parameters
 ----
